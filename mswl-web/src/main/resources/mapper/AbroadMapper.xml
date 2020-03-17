@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.abroad.AbroadRepository">
+
+    <!--
+         web海外招聘Mapper.
+         @author 张孝党 2019/12/23.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/23 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getAbroadList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as abroadid
+             ,a.title
+             ,a.article
+             ,a.updtime as time
+             ,b.uname as editor
+        FROM
+             g_abroad a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+        ORDER BY a.updtime desc
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_abroad
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+    </select>
+
+    <!-- 新增招募信息 -->
+    <insert id="addAbroad" parameterType="Map">
+        INSERT INTO
+            g_abroad (
+                 id
+                ,title
+                ,article
+                ,updtime
+                ,upduid
+            )
+        VALUES (
+             #{id}
+            ,#{title}
+            ,#{article}
+            ,#{updtime}
+            ,#{upduid}
+        )
+    </insert>
+
+    <!-- 删除招募信息 -->
+    <delete id="deleteAbroad" parameterType="Map">
+        DELETE FROM
+            g_abroad
+        WHERE
+            id = #{id}
+    </delete>
+
+    <!-- 更新招募信息 -->
+    <update id="updAbroad" parameterType="Map">
+        UPDATE
+            g_abroad
+        SET
+             title = #{title}
+            ,article = #{article}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 获取招募详细内容 -->
+    <select id="getAbroadDetail" parameterType="Map" resultType="Map">
+        SELECT
+             a.title
+            ,a.updtime
+            ,b.uname
+            ,a.article
+        FROM
+            g_abroad a
+        LEFT JOIN
+            turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+        1 = 1
+        <if test="id != null and id != ''">
+            AND a.id = #{id}
+        </if>
+    </select>
+</mapper>

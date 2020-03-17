@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.tprice.TPriceRepository">
+
+    <!--
+         Turnitin价格设置Mapper.
+         @author 张孝党 2019/12/25.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/25 张孝党 创建.
+     -->
+
+    <!-- 获取参数 -->
+    <select id="getTprice" resultType="Map">
+        SELECT
+             t_price as price
+            ,t_wordnum as wordnum
+            ,t_discount as discount
+        FROM
+             g_price
+    </select>
+
+    <!-- 更新参数表信息 -->
+    <update id="updTprice" parameterType="Map">
+        UPDATE
+            g_price
+        SET
+             t_price = #{price}
+            ,t_wordnum = #{wordnum}
+            ,t_discount = #{discount}
+        WHERE
+            id = 'fe5101a4263d11ea9ba800163e0bcfd2'
+    </update>
+
+</mapper>

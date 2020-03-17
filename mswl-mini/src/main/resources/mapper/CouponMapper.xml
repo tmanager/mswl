@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.coupon.CouponRepository">
+
+    <!--
+         小程序端个人优惠券Mapper.
+         @author 张孝党 2020/01/06.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/06 张孝党 创建.
+     -->
+
+    <!-- 查询优惠券 -->
+    <select id="getCouponList" parameterType="Map" resultType="Map">
+        SELECT
+             a.id as id
+            ,b.id as couponid
+            ,b.couponname as name
+            ,b.upfee as upfee
+            ,b.amount as amount
+            ,a.couponstatus as status
+            ,b.enddate
+        FROM
+             g_coupon_his a
+        LEFT JOIN
+             g_coupon b
+          ON b.id = a.couponid
+        WHERE
+             a.openid = #{openid}
+         AND b.type = #{type}
+        ORDER BY
+             a.updtime DESC
+            ,a.couponstatus
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询优惠券 -->
+    <select id="getCouponListCnt" parameterType="Map" resultType="int">
+        SELECT
+            COUNT(*) as cnt
+        FROM
+            g_coupon_his a
+        LEFT JOIN
+            g_coupon b
+         ON b.id = a.couponid
+        WHERE
+            a.openid = #{openid}
+         AND b.type = #{type}
+    </select>
+
+    <!-- 判断转赠人的手机号是否存在 -->
+    <select id="wxUserPhoneExists" parameterType="Map" resultType="Map">
+        SELECT
+             openid
+        FROM
+            g_wx_user
+        WHERE
+            pure_phone_number = #{phonenumber}
+    </select>
+
+    <select id="getCouponInfo" parameterType="Map" resultType="Map">
+        SELECT
+            couponstatus
+        FROM
+            g_coupon_his
+        WHERE
+            id = #{id}
+    </select>
+
+    <insert id="insNewCouponHis" parameterType="Map">
+        INSERT INTO
+            g_coupon_his (
+                     id
+                    ,openid
+                    ,couponid
+                    ,updtime
+                    ,couponstatus
+                    ,couponsource
+                    ,givedopenid
+            )
+        VALUES (
+                     #{id}
+                    ,#{openid}
+                    ,#{couponid}
+                    ,#{updtime}
+                    ,#{couponstatus}
+                    ,#{couponsource}
+                    ,#{givedopenid}
+        )
+    </insert>
+
+    <update id="updCouponHis" parameterType="Map">
+        UPDATE
+            g_coupon_his
+        SET
+             givedopenid = #{givedopenid}
+            ,givedphone = #{givedphone}
+            ,couponstatus = #{couponstatus}
+            ,usetime = #{usetime}
+        WHERE
+            id = #{id}
+    </update>
+</mapper>

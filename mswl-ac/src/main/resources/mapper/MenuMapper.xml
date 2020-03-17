@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.menu.MenuRepository">
+
+    <!--
+        Copyright(C) ShanDongYinFang 2019.
+        <p>
+        web端菜单信息操作Mapper.
+        @author 张明亮 2019/08/08.
+        @version V0.0.1.
+        <p>
+        更新履历： V0.0.1 2019/08/08 张明亮 创建.
+       -->
+
+    <resultMap type="com.frank.mswl.ac.menu.MenuResponse$MenuTree" id="MenuTree">
+        <id column="menuid" property="menuid"/>
+        <collection property="menulist" select="getSonMenu" column="menuid"></collection>
+    </resultMap>
+
+    <!-- 查询菜单信息列表.递归 -->
+    <select id="menuQueryLists" resultType="Map" parameterType="Map">
+        SELECT
+            id AS menuid
+            ,uname AS menuname
+            ,url AS url
+            ,type AS menutype
+            ,sort AS sort
+            ,parent_id AS fjdid
+            ,description AS remark
+            ,code AS menucode
+            ,menuicon AS menuicon
+        FROM
+            turnin_menu
+        WHERE
+            1 = 1
+        <if test="menucode != null and menucode != ''">
+            AND code LIKE "%"#{menucode}"%"
+        </if>
+        <if test="menuname != null and menuname != ''">
+            AND uname LIKE "%"#{menuname}"%"
+        </if>
+        ORDER BY sort ASC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询菜单信息列表. -->
+    <select id="menuQueryList" resultMap="MenuTree" parameterType="Map">
+        SELECT
+            id AS menuid
+            ,uname AS menuname
+            ,url AS url
+            ,type AS menutype
+            ,sort AS sort
+            ,description AS remark
+        FROM
+            turnin_menu
+        WHERE
+            1 = 1
+        AND parent_id = ''
+        <if test="menucode != null and menucode != ''">
+            AND code LIKE "%"#{menucode}"%"
+        </if>
+        <if test="menuname != null and menuname != ''">
+            AND uname LIKE "%"#{menuname}"%"
+        </if>
+        ORDER BY sort ASC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+    <!-- 查询子菜单信息列表. -->
+    <select id="getSonMenu" resultType="com.frank.mswl.ac.menu.MenuResponse$MenuTree">
+         SELECT
+            m.id AS menuid
+            ,m.uname AS menuname
+            ,m.url AS url
+            ,m.type AS menutype
+            ,m.sort AS sort
+            ,m.description AS remark
+        FROM
+            turnin_menu m
+            LEFT JOIN turnin_menu ram ON m.parent_id = ram.id
+        WHERE
+            m.parent_id = #{menuid}
+     </select>
+
+    <resultMap type="com.frank.mswl.ac.menu.MenuResponse$MenuTree" id="MenuTrees">
+        <id column="menuid" property="menuid"/>
+        <result column="userid" property="userid"/>
+        <collection property="menulist" select="getSonUserMenu" column="menuid"></collection>
+    </resultMap>
+
+    <!-- 查询用户功能权限菜单列表. 递归-->
+    <select id="userfunctionQuerys" resultType="Map" parameterType="String">
+        SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+            ,ym.parent_id AS fjdid
+            ,ym.code AS menucode
+            ,ym.menuicon AS menuicon
+        FROM
+            turnin_user_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+        WHERE
+            up.user_id = #{userid}
+        ORDER BY
+            ym.sort ASC
+    </select>
+
+    <!-- 查询用户功能权限菜单列表. -->
+    <select id="userfunctionQuery" resultMap="MenuTrees" parameterType="String">
+        SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+        FROM
+            turnin_user_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+        WHERE
+            ym.parent_id = ''
+            AND up.user_id = #{userid}
+        ORDER BY
+            ym.sort ASC
+    </select>
+
+    <!-- 查询用户功能权限子菜单信息列表. -->
+    <select id="getSonUserMenu" resultType="com.frank.mswl.ac.menu.MenuResponse$MenuTree">
+         SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+        FROM
+            turnin_user_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+            LEFT JOIN turnin_menu ram ON ym.parent_id = ram.id
+        WHERE
+            ym.parent_id = #{menuid} and up.user_id = #{userid}
+     </select>
+
+    <resultMap type="com.frank.mswl.ac.menu.MenuResponse$MenuTree" id="MenuTreea">
+        <id column="menuid" property="menuid"/>
+        <result column="roleid" property="roleid"/>
+        <collection property="menulist" select="getSonRoleMenu" column="menuid"></collection>
+    </resultMap>
+
+    <!-- 查询角色功能权限菜单列表.递归 -->
+    <select id="rolefunctionQuerys" resultMap="MenuTreea" parameterType="String">
+        SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+            ,ym.parent_id AS fjdid
+            ,ym.code AS menucode
+            ,ym.menuicon AS menuicon
+        FROM
+            turnin_role_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+        WHERE
+            up.role_id = #{role}
+        ORDER BY
+            ym.sort ASC
+    </select>
+
+    <!-- 查询角色功能权限菜单列表. -->
+    <select id="rolefunctionQuery" resultMap="MenuTreea" parameterType="String">
+        SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+        FROM
+            turnin_role_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+        WHERE
+            ym.parent_id = ''
+            AND up.role_id = #{role}
+
+        ORDER BY
+            ym.sort ASC
+    </select>
+
+    <!-- 查询角色功能权限子菜单信息列表. -->
+    <select id="getSonRoleMenu" resultType="com.frank.mswl.ac.menu.MenuResponse$MenuTree">
+         SELECT
+            ym.id AS menuid
+            ,ym.uname AS menuname
+            ,ym.url AS url
+            ,ym.type AS menutype
+            ,ym.sort AS sort
+            ,ym.description AS remark
+        FROM
+            turnin_role_power_relation up
+            LEFT JOIN turnin_menu ym ON up.power_id = ym.id
+            LEFT JOIN turnin_menu ram ON ym.parent_id = ram.id
+        WHERE
+            ym.parent_id = #{menuid} and up.role_id = #{roleid}
+     </select>
+
+    <!-- 查询菜单信息数量. -->
+    <select id="number" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            turnin_menu;
+    </select>
+
+    <!-- 查询菜单下是否存在子菜单. -->
+    <select id="sonMenu" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            turnin_menu
+        WHERE
+            parent_id = #{parentmenuid};
+    </select>
+
+    <!-- 添加菜单信息. -->
+    <insert id="menuAdd" parameterType="Map">
+        INSERT INTO
+            turnin_menu (
+            id
+            ,code
+            ,sort
+            ,type
+            ,uname
+            ,description
+            ,parent_id
+            ,addTime
+            ,operator
+            ,url
+            ,menuicon
+            )
+		VALUES
+		    ( #{uuid}
+		    ,#{menucode}
+		    ,#{sort}
+		    ,#{menutype}
+		    ,#{menuname}
+		    ,#{remark}
+		    ,#{parentmenuid}
+		    ,#{addTime}
+		    ,#{operator}
+		    ,#{url}
+		    ,#{menuicon}
+		    );
+    </insert>
+
+    <!-- 修改菜单信息. -->
+    <update id="menuUpdate" parameterType="Map">
+       UPDATE turnin_menu SET
+            uname = #{menuname}
+            ,sort = #{sort}
+            ,type=#{menutype}
+            ,description=#{remark}
+            ,parent_id=#{parentmenuid}
+            ,updateTime=#{updateTime}
+            ,url=#{url}
+            ,menuicon=#{menuicon}
+       WHERE id= #{menuid};
+    </update>
+
+    <!-- 删除菜单信息. -->
+    <delete id="menuDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_menu
+        WHERE
+            id = #{menuid};
+    </delete>
+    <!--查询菜单代码的唯一-->
+    <select id="menuOnly" parameterType="String" resultType="int">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_menu
+        WHERE
+            CODE = #{menucode}
+    </select>
+</mapper>

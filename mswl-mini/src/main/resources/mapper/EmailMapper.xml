@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.email.EmailRepository">
+
+    <!--
+         小程序发送报告Mapper.
+         @author 张孝党 2020/01/12.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/12 张孝党 创建.
+     -->
+
+    <!-- -->
+    <update id="updEmailByOpenId" parameterType="Map">
+        UPDATE
+            g_wx_user
+        SET
+            email = #{email}
+        WHERE
+            openid = #{openid}
+    </update>
+</mapper>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.login.LoginRepository">
+
+    <!--
+         小程序用户登录/注册Mapper.
+         @author 张孝党 2019/12/27.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/27 张孝党 创建.
+     -->
+
+    <!-- 查询 -->
+    <select id="getWxUserCnt" parameterType="Map" resultType="Map">
+        SELECT
+             openid
+            ,phonenumber
+            ,mark
+            ,learn_country
+            ,major
+            ,email
+        FROM
+             g_wx_user
+        WHERE
+            openid = #{openid}
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="insWxUserInfo" parameterType="Map">
+        INSERT INTO
+            g_wx_user(
+                 id
+                ,openid
+                ,avatarurl
+                ,nick_name
+                ,phonenumber
+                ,pure_phone_number
+                ,country_code
+                ,gender
+                ,city
+                ,province
+                ,country
+                ,updtime
+            )
+        VALUES (
+                 #{id}
+                ,#{openid}
+                ,#{avatarurl}
+                ,#{nick_name}
+                ,#{phonenumber}
+                ,#{pure_phone_number}
+                ,#{country_code}
+                ,#{gender}
+                ,#{city}
+                ,#{province}
+                ,#{country}
+                ,#{updtime}
+        )
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="updWxUserInfo" parameterType="Map">
+        UPDATE
+            g_wx_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="avatarurl != null and avatarurl != ''">avatarurl = #{avatarurl},</if>
+            <if test="nick_name != null and nick_name != ''">nick_name = #{nick_name},</if>
+            <if test="phonenumber != null and phonenumber != ''">phonenumber = #{phonenumber},</if>
+            <if test="pure_phone_number != null and pure_phone_number != ''">pure_phone_number = #{pure_phone_number},</if>
+            <if test="country_code != null and country_code != ''">country_code = #{country_code},</if>
+            <if test="gender != null and gender != ''">gender = #{gender},</if>
+            <if test="city != null and city != ''">city = #{city},</if>
+            <if test="province != null and province != ''">province = #{province},</if>
+            <if test="country != null and country != ''">country = #{country},</if>
+        </trim>
+        WHERE
+            openid = #{openid}
+    </update>
+
+    <!-- 赠送2个语法免费检测优惠券 -->
+    <insert id="insWxUserCoupon" parameterType="Map">
+        INSERT INTO
+             g_coupon_his (
+                     id
+                    ,openid
+                    ,couponid
+                    ,updtime
+                    ,couponstatus
+                    ,couponsource
+             )
+        VALUES (
+                     #{id}
+                    ,#{openid}
+                    ,#{couponid}
+                    ,#{updtime}
+                    ,#{couponstatus}
+                    ,#{couponsource}
+        )
+    </insert>
+
+    <!-- 查询个人信息是否完善 -->
+    <select id="getWxUserPerFlagByOpenId" parameterType="Map" resultType="Map">
+        SELECT
+            perflag
+        FROM
+            g_wx_user
+        WHERE
+            openid = #{openid}
+    </select>
+
+    <!-- 完善个人信息 -->
+    <update id="updWxUserPerInfo" parameterType="Map">
+        UPDATE
+            g_wx_user
+        SET
+             learn_country = #{learncountry}
+            ,major = #{major}
+            ,email = #{email}
+            ,perflag = '1'
+        WHERE
+            openid = #{openid}
+    </update>
+</mapper>

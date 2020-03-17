@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.torder.TOrderRepository">
+
+    <!--
+         小程序查重列表Mapper.
+         @author 张孝党 2020/01/07.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/07 张孝党 创建.
+     -->
+
+    <!-- 查重列表信息 -->
+    <select id="getTurnitinList" parameterType="Map" resultType="Map">
+        SELECT
+             a.orderid
+            ,a.firstname
+            ,a.lastname
+            ,a.titile
+            ,a.filename
+            ,a.pagesize
+            ,a.wordcnt
+            ,a.charcnt
+            ,a.filesize
+            ,a.repetrate
+            ,a.updtime
+            ,a.status
+            ,a.pdfreporturl
+            ,a.htmlreporturl
+            ,b.email
+            ,a.checktype
+            ,b.openid
+        FROM
+            g_order a
+        LEFT JOIN
+            g_wx_user b
+         ON b.openid = a.openid
+        WHERE
+             a.openid = #{openid}
+         AND a.checktype in ('0', '1')
+         AND a.status IN
+        <foreach item="item" index="index" collection="statusList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY a.updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询价格信息 -->
+    <select id="getFeeInfo" resultType="Map">
+        SELECT
+              t_price
+             ,t_wordnum
+             ,t_discount
+             ,g_price
+             ,g_wordnum
+             ,g_discount
+        FROM
+            g_price
+    </select>
+
+    <!-- 删除订单 -->
+    <delete id="delTurnitinOrder" parameterType="Map">
+        DELETE FROM
+            g_order
+        WHERE
+            orderid = #{orderid}
+    </delete>
+</mapper>

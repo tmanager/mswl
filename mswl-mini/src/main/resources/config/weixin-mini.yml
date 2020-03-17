@@ -1,0 +1,12 @@
+# 微信小程序配置文件
+weixin:
+  # appid
+  appid: wx69939c350fd8de3d
+  # AppSecret
+  appsecret: d2d08d4802676b6d4e9ee4d1c5563969
+  # 登录凭证URL
+  code2Session: https://api.weixin.qq.com/sns/jscode2session?appid={0}&secret={1}&js_code={2}&grant_type=authorization_code
+  # AccessToken RUL
+  getaccesstoken: https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={0}&secret={1}
+  # getPaidUnionId
+  getpaidunionId: https://api.weixin.qq.com/wxa/getpaidunionid?access_token={0}&openid={1}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.order.OrderRepository">
+
+    <!--
+         web端订单操作Mapper.
+         @author 张孝党 2020/01/14.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/14 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getOrderList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id
+             ,a.checktype
+             ,a.orderid
+             ,b.pure_phone_number as phonenumber
+             ,a.updtime
+             ,CONCAT(a.firstname, '|', a.lastname) as fullname
+             ,ifnull(a.titile, '　') as title
+             ,a.filename
+             ,ifnull(a.originalurl, '　') as originalurl
+             ,ifnull(a.pdfreporturl, '　') as pdfreporturl
+             ,ifnull(a.htmlreporturl, '　') as htmlreporturl
+             ,ifnull(a.wordcnt, '0') as wordcnt
+             ,ifnull(a.repetrate, '　') as repetrate
+             ,CASE a.status
+                WHEN '0' THEN '初始'
+                WHEN '1' THEN '待支付'
+                WHEN '2' THEN '检测中'
+                WHEN '3' THEN '报告下载中'
+                WHEN '4' THEN '检测完成'
+                WHEN '9' THEN '已退款'
+                ELSE '其它'
+              END as status
+        FROM
+            g_order a
+        LEFT JOIN
+            g_wx_user b
+         ON b.openid = a.openid
+        WHERE
+             a.status in ('1', '2', '3', '4', '9')
+        <if test="orderid != null and orderid != ''">
+         AND a.orderid = #{orderid}
+        </if>
+        <if test="phone != null and phone != ''">
+         AND b.pure_phone_number = #{phone}
+        </if>
+        <if test="checktype != null and checktype != ''">
+         AND a.checktype = #{checktype}
+        </if>
+        <if test="status != null and status != ''">
+         AND a.status = #{status}
+        </if>
+        <if test="startdate != null and startdate != ''">
+         AND a.updtime &gt;= #{startdate}
+        </if>
+        <if test="enddate != null and enddate != ''">
+            AND a.updtime &lt;= #{enddate}
+        </if>
+        ORDER BY a.updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize}
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getOrderCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_order a
+        LEFT JOIN
+            g_wx_user b
+         ON b.openid = a.openid
+        WHERE
+            a.status in ('1', '2', '3', '4', '9')
+        <if test="orderid != null and orderid != ''">
+         AND a.orderid = #{orderid}
+        </if>
+        <if test="phone != null and phone != ''">
+         AND b.pure_phone_number = #{phone}
+        </if>
+        <if test="checktype != null and checktype != ''">
+         AND a.checktype = #{checktype}
+        </if>
+        <if test="status != null and status != ''">
+         AND a.status = #{status}
+        </if>
+        <if test="startdate != null and startdate != ''">
+         AND a.updtime &gt;= #{startdate}
+        </if>
+        <if test="enddate != null and enddate != ''">
+         AND a.updtime &lt;= #{enddate}
+        </if>
+    </select>
+
+    <update id="updOrderReport" parameterType="Map">
+        UPDATE
+            g_order
+        <trim prefix="set" suffixOverrides=",">
+            <if test="pdfreporturl != null and pdfreporturl != ''">pdfreporturl = #{pdfreporturl},</if>
+            <if test="htmlreporturl != null and htmlreporturl != ''">htmlreporturl = #{htmlreporturl},</if>
+            <if test="repetrate != null and repetrate != ''">repetrate = #{repetrate},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+        </trim>
+        WHERE
+            orderid = #{orderid}
+    </update>
+
+</mapper>

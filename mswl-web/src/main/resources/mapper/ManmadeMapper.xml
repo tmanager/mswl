@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.manmade.ManmadeRepository">
+
+    <!--
+         人工服务Mapper.
+         @author 张孝党 2019/12/30.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/30 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getManmadeList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as manmadeid
+             ,a.title
+             ,a.updtime as time
+             ,b.uname as editor
+        FROM
+            g_manmade a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+        ORDER BY a.updtime desc
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_manmade
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+    </select>
+
+    <!-- 更新人工服务 -->
+    <update id="updManmade" parameterType="Map">
+        UPDATE
+            g_manmade
+        SET
+             title = #{title}
+            ,article = #{article}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 获取人工服务详细内容 -->
+    <select id="getManmadeDetail" parameterType="Map" resultType="Map">
+        SELECT
+             a.title
+            ,a.updtime
+            ,b.uname
+            ,a.article
+        FROM
+            g_manmade a
+        LEFT JOIN
+            turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+        1 = 1
+        <if test="id != null and id != ''">
+            AND a.id = #{id}
+        </if>
+    </select>
+</mapper>

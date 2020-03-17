@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.coupon.CouponRepository">
+
+    <!--
+         web端优惠券操作Mapper.
+         @author 张孝党 2020/01/07.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/07 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getCouponList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id
+             ,ifnull(a.couponname, '　') as couponname
+             ,a.amount
+             ,a.usemark
+             ,a.upfee
+             ,a.numbers
+             ,a.enddate
+             ,ifnull(a.type, '　') as type
+             ,ifnull(a.status, '　') as status
+        FROM
+            g_coupon a
+        WHERE
+            1 = 1
+        <if test="couponname != null and couponname != ''">
+            AND couponname LIKE "%"#{couponname}"%"
+        </if>
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        ORDER BY a.updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_coupon
+        WHERE
+            1 = 1
+        <if test="couponname != null and couponname != ''">
+            AND couponname LIKE "%"#{couponname}"%"
+        </if>
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+    </select>
+
+    <!-- 新增优惠券 -->
+    <insert id="addCoupon" parameterType="Map">
+        INSERT INTO
+            g_coupon (
+                 id
+                ,couponname
+                ,couponbak
+                ,updtime
+                ,upduid
+                ,usemark
+                ,upfee
+                ,numbers
+                ,enddate
+                ,type
+                ,amount
+                ,status
+                ,usenumbers
+            )
+        VALUES (
+             #{id}
+            ,#{couponname}
+            ,#{couponbak}
+            ,#{updtime}
+            ,#{upduid}
+            ,#{usemark}
+            ,#{upfee}
+            ,#{numbers}
+            ,#{enddate}
+            ,#{type}
+            ,#{amount}
+            ,#{status}
+            ,'0'
+        )
+    </insert>
+
+    <!-- 获取优惠券详细内容 -->
+    <select id="getCouponDetail" parameterType="Map" resultType="Map">
+        SELECT
+              ifnull(b.pure_phone_number,' ') as phone
+             ,ifnull(a.updtime,' ') as updtime
+             ,ifnull(a.couponsource,' ') as couponsource
+             ,ifnull(a.couponstatus,' ') as couponstatus
+        FROM
+            g_coupon_his a
+        INNER JOIN
+            g_wx_user b
+        ON
+            a.openid = b.openid
+        WHERE
+            1 = 1
+        <if test="couponid != null and couponid != ''">
+            AND a.couponid = #{couponid}
+        </if>
+        <if test="phone != null and phone != ''">
+            AND a.givedphone = #{phone}
+        </if>
+        ORDER BY a.updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getHisCnt" parameterType="Map" resultType="int">
+        SELECT
+        count(*) as cnt
+        FROM
+        g_coupon_his
+        WHERE
+        1 = 1
+        <if test="couponid != null and couponid != ''">
+            AND couponid = #{couponid}
+        </if>
+        <if test="phone != null and phone != ''">
+            AND givedphone = #{phone}
+        </if>
+    </select>
+
+    <!-- 删除优惠券 -->
+    <delete id="deleteCoupon" parameterType="Map">
+        DELETE FROM
+            g_coupon
+        WHERE
+            id = #{id}
+    </delete>
+
+    <!-- 更新优惠券 -->
+    <update id="updCoupon" parameterType="Map">
+        UPDATE
+            g_coupon
+        SET
+             couponname = #{couponname}
+            ,couponbak = #{couponbak}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+            ,usemark = #{usemark}
+            ,upfee = #{upfee}
+            ,numbers = #{numbers}
+            ,enddate = #{enddate}
+            ,type = #{type}
+            ,amount = #{amount}
+            ,status = #{status}
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 新增优惠券赠送详细 -->
+    <insert id="addCouponHis" parameterType="Map">
+        INSERT INTO
+            g_coupon_his (
+                 id
+                ,openid
+                ,couponid
+                ,updtime
+                ,usemark
+                ,couponstatus
+                ,couponsource
+                ,givedopenid
+                ,givedphone
+                ,usetime
+            )
+        VALUES (
+             #{id}
+            ,#{openid}
+            ,#{couponid}
+            ,#{updtime}
+            ,'0'
+            ,'0'
+            ,'1'
+            ,null
+            ,null
+            ,null
+        )
+    </insert>
+
+    <!-- 获取微信用户openid -->
+    <select id="getOpenid" parameterType="String" resultType="String">
+        SELECT
+            openid
+        FROM
+            g_wx_user
+        WHERE
+            pure_phone_number = #{phone}
+    </select>
+
+    <!-- 校验是否还能赠送 -->
+    <select id="chkUseNumbers" parameterType="String" resultType="int">
+        SELECT
+            count(id)
+        FROM
+            g_coupon
+        WHERE
+            id = #{couponid}
+            and status = '0'
+    </select>
+
+    <!-- 使用个数更新 -->
+    <update id="updUseNumbers" parameterType="String">
+        UPDATE
+            g_coupon
+        SET
+             usenumbers = usenumbers + 1
+            ,status =
+             case when usenumbers = numbers then
+                '2'
+             else
+             	status
+              end
+        WHERE
+            id = #{couponid}
+    </update>
+
+</mapper>

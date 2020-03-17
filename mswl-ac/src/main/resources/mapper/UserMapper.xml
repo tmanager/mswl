@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.user.UserRepository">
+
+    <!--
+         Copyright(C) ShanDongYinFang 2019.
+         <p>
+         web端用户信息操作Mapper.
+         @author 张明亮 2019/08/08.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/08/08 张明亮 创建.
+     -->
+
+    <!-- 添加用户信息. -->
+    <insert id="userAdd" parameterType="Map">
+        INSERT INTO
+            turnin_user (
+              id
+            , uid
+            , passwd
+            , uname
+            , sex
+            , phone
+            , tel
+            , email
+            , description
+            , addTime
+            , operator
+            , portrait
+            , birthday
+            )
+		VALUES
+		    (
+		     #{usid}
+		    ,#{userid}
+		    ,#{passwd}
+		    ,#{username}
+		    ,#{sex}
+		    ,#{mobile}
+		    ,#{phone}
+		    ,#{mail}
+		    ,#{remark}
+		    ,#{addTime}
+		    ,#{operator}
+		    ,#{image}
+		    ,#{birthday}
+		    );
+    </insert>
+
+    <!-- 添加用户和机构关联信息. -->
+    <insert id="userOrganAdd" parameterType="Map">
+        INSERT INTO
+            turnin_user_organ_relation (
+            id
+            , user_id
+            , organ_id
+            , addTime
+            , operator
+             )
+        VALUES
+            (
+            #{uuid}
+            ,#{usid}
+            ,#{organid}
+            ,#{addTime}
+            ,#{operator}
+            );
+    </insert>
+
+    <!-- 添加用户角色关联信息. -->
+    <insert id="userRoleAdd" parameterType="Map">
+        INSERT INTO turnin_user_role_relation (
+            id
+            , user_id
+            , role_id
+            , addTime
+            , operator
+             )
+        VALUES
+            (
+            #{uuid}
+            ,#{usid}
+            ,#{role}
+            ,#{addTime}
+            ,#{operator}
+            );
+    </insert>
+
+    <!-- 删除用户信息. -->
+    <delete id="userDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user
+        WHERE
+            id = #{userid};
+    </delete>
+
+    <!-- 删除用户和机构关联信息. -->
+    <delete id="userOrganDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user_organ_relation
+        WHERE
+            user_id = #{userid};
+    </delete>
+
+    <!-- 删除用户和角色关联信息. -->
+    <delete id="userRoleDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user_role_relation
+        WHERE
+            user_id = #{userid};
+    </delete>
+
+    <!-- 删除用户和功能关联信息. -->
+    <delete id="userFunctionDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user_power_function_relation
+        WHERE
+            user_id = #{userid}
+    </delete>
+
+    <!-- 删除用户和功能关联信息. -->
+    <delete id="userFunctionDeletes" >
+        DELETE
+        FROM
+        turnin_user_power_function_relation
+        WHERE
+        user_id = #{userid} AND power_id = #{powerid}
+    </delete>
+
+    <!-- 修改用户信息. -->
+    <update id="userUpdate" parameterType="Map">
+        UPDATE turnin_user SET
+             uname = #{username}
+             ,sex=#{sex}
+             ,phone=#{mobile}
+             ,tel=#{phone}
+             ,email=#{mail}
+             ,updateTime=#{updateTime}
+             ,operator=#{operator}
+             ,description=#{remark}
+             ,portrait=#{image}
+             ,birthday=#{birthday}
+         WHERE
+            id= #{usid}
+            ;
+    </update>
+
+    <!-- 修改用户和机构关联信息. -->
+    <update id="userOrganUpdate" parameterType="Map">
+        UPDATE turnin_user_organ_relation SET
+            organ_id = #{organid}
+            ,updateTime=#{updateTime}
+            ,operator=#{operator}
+        WHERE user_id= #{usid}
+        ;
+    </update>
+
+    <!-- 查询用户信息. -->
+    <select id="userQueryList" resultType="java.util.HashMap" parameterType="Map">
+        SELECT
+            u.uid AS userid
+            ,u.uname AS username
+            ,u.sex AS sex
+            ,ifnull( u.phone, '' ) AS mobile
+            ,ifnull( u.tel, '' ) AS phone
+            ,ifnull( u.email, '' ) AS mail
+            ,ifnull(o.uname, '' ) AS organname
+            ,o.id AS organid
+            ,ifnull((SELECT GROUP_CONCAT( role.id )
+                        FROM
+                            turnin_user_role_relation rel
+                        LEFT JOIN turnin_role role ON rel.role_id = role.id
+                        WHERE
+                            rel.user_id = u.id
+                        ), '') AS roleid
+            ,ifnull((SELECT GROUP_CONCAT( CONCAT( role.uname ) )
+                        FROM
+                            turnin_user_role_relation rel
+                        LEFT JOIN turnin_role role ON rel.role_id = role.id
+                        WHERE
+                            rel.user_id = u.id
+                            ), '') AS rolename
+            ,ifnull( u.description, '' ) AS remark
+            ,ifnull( u.birthday, '' ) AS birthday
+        FROM
+            turnin_user u
+        LEFT JOIN turnin_user_organ_relation ors ON u.id = ors.user_id
+        LEFT JOIN turnin_organ o ON o.id = ors.organ_id
+        WHERE
+            1 =1
+        <if test="userid != null and userid != ''">
+            AND u.uid LIKE "%"#{userid}"%"
+        </if>
+        <if test="username != null and username != ''">
+            AND u.uname LIKE "%"#{username}"%"
+        </if>
+        <if test="organid != null and organid != ''">
+            AND o.id=#{organid}
+        </if>
+        ORDER BY u.addTime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询总数据条数. -->
+    <select id="number" resultType="int" parameterType="Map">
+		SELECT
+            count( 1 )
+        FROM
+            (
+        SELECT
+        u.uid AS userid
+        ,u.uname AS username
+        ,u.sex AS sex
+        ,ifnull( u.phone, '' ) AS mobile
+        ,ifnull( u.tel, '' ) AS phone
+        ,ifnull( u.email, '' ) AS mail
+        ,ifnull(o.uname, '' ) AS organname
+        ,o.id AS organid
+        ,ifnull((SELECT GROUP_CONCAT( role.id )
+        FROM
+        turnin_user_role_relation rel
+        LEFT JOIN turnin_role role ON rel.role_id = role.id
+        WHERE
+        rel.user_id = u.id
+        ), '') AS roleid
+        ,ifnull((SELECT GROUP_CONCAT( CONCAT( role.uname ) )
+        FROM
+        turnin_user_role_relation rel
+        LEFT JOIN turnin_role role ON rel.role_id = role.id
+        WHERE
+        rel.user_id = u.id
+        ), '') AS rolename
+        ,ifnull( u.description, '' ) AS remark
+        ,ifnull( u.birthday, '' ) AS birthday
+        FROM
+        turnin_user u
+        LEFT JOIN turnin_user_organ_relation ors ON u.id = ors.user_id
+        LEFT JOIN turnin_organ o ON o.id = ors.organ_id
+        WHERE
+        1 =1
+        <if test="userid != null and userid != ''">
+            AND u.uid LIKE "%"#{userid}"%"
+        </if>
+        <if test="username != null and username != ''">
+            AND u.uname LIKE "%"#{username}"%"
+        </if>
+        <if test="organid != null and organid != ''">
+            AND o.id=#{organid}
+        </if>
+            ) AS temp
+	</select>
+
+    <!-- 查询个人用户信息. -->
+    <select id="userQuery" resultType="Map" parameterType="String">
+        SELECT
+            id
+            ,uid
+            ,passwd
+            ,uname
+            ,sex
+            ,portrait
+            ,phone
+            ,birthday
+            ,tel
+            ,email
+            ,description
+            ,addTime
+            ,updateTime
+            ,operator
+        FROM
+            turnin_user
+        WHERE
+            uid = #{userid};
+    </select>
+
+    <!-- 添加用户信息 验证帐号唯一性. -->
+    <select id="userOnly" resultType="int" parameterType="String">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_user
+        WHERE
+            uid = #{userid};
+    </select>
+
+    <!-- 密码重置   密码修改 -->
+    <update id="passWordRest" parameterType="Map">
+        UPDATE turnin_user SET
+            passwd = #{password}
+            ,updateTime=#{updateTime}
+            ,operator=#{operator}
+        WHERE
+            uid=#{userid}
+            ;
+    </update>
+
+    <!-- 获取机构id. -->
+    <select id="organId" resultType="String" parameterType="String">
+       SELECT id FROM  turnin_organ where uname=#{organname}
+    </select>
+
+    <!-- 获取角色id. -->
+    <select id="roleId" resultType="String" parameterType="String">
+        SELECT id FROM turnin_role where uname=#{rolename}
+    </select>
+</mapper>

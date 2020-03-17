@@ -1,0 +1,12 @@
+# 微信配置文件
+wxpay:
+  # appid
+  appid: wx69939c350fd8de3d
+  # 微信支付商户号
+  mch_id: 1561448571
+  # 微信支付商户密钥
+  mch_key: 25e673e32c8b11eab3a300163e0bcfd2
+  # 证书路径
+  key_path: classpath:cert/apiclient_cert.p12
+  # 异步接收微信支付结果通知的回调地址
+  notify_url: https://www.gramtu.com/gramtu/mini/wxpay/callback

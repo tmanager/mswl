@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.userpower.UserPowerRepository">
+
+    <!--
+       Copyright(C) ShanDongYinFang 2019.
+       <p>
+       web端广告信息操作Mapper.
+       @author 张明亮 2019/06/28.
+       @version V0.0.1.
+       <p>
+       更新履历： V0.0.1 2019/06/28 张明亮 创建.
+     -->
+
+    <!-- 查询用户信息. -->
+    <select id="userPowerQuery" resultType="Map" parameterType="Map">
+        SELECT
+            id AS id
+            ,user_id AS userid
+            ,power_id AS menuid
+            ,power AS power
+        FROM
+            turnin_user_power_relation
+        WHERE
+            user_id = #{userid}
+    </select>
+
+    <!-- 查询用户菜单功能权限信息. -->
+    <select id="userPowerFunctionQuery" resultType="Map" parameterType="Map">
+        SELECT
+            id as id
+            ,power_id as menuid
+            ,user_id as userid
+            ,function_id as functionid
+            ,ftion as ftion
+        FROM
+            turnin_user_power_function_relation
+        WHERE
+            user_id = #{userid}
+    </select>
+    <!-- 查询用户菜单按钮功能信息. -->
+    <select id="userfunctionQuerys" resultType="Map" parameterType="Map">
+        SELECT
+            f.id AS functionid,
+            f.uname AS functionname,
+            f.CODE AS functioncode,
+            ifnull( f.description, "" ) AS remark
+        FROM
+            turnin_function_button f
+        LEFT JOIN turnin_menu m ON f.menu_id=m.id
+        WHERE
+            m.code=#{menuid}
+    </select>
+    <!-- 添加用户权限信息. -->
+    <insert id="userPowerAdd" parameterType="Map">
+        INSERT INTO turnin_user_power_relation (
+            id
+            , user_id
+            , power_id
+            , addTime
+            , operator
+            , power
+             )
+        VALUES(
+            #{uuid}
+            ,#{userid}
+            ,#{menuid}
+            ,#{addTime}
+            ,#{operator}
+            ,'1'
+            );
+    </insert>
+
+    <!-- 删除用户权限关联信息. -->
+    <delete id="userPowerDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user_power_relation
+        WHERE
+            user_id = #{userid};
+    </delete>
+
+    <!-- 删除用户权限功能按钮关联信息. -->
+    <delete id="userPowerFunctionDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_user_power_function_relation
+        WHERE
+            power_id = #{menuid}and user_id=#{userid};
+    </delete>
+
+    <!-- 添加用户权限功能按钮信息. -->
+    <insert id="userfunctionAdd" parameterType="Map">
+        INSERT INTO turnin_user_power_function_relation (
+            id
+            , power_id
+            , user_id
+            , function_id
+            , ftion
+            , addTime
+            , operator )
+        VALUES(
+            #{uuid}
+            ,#{menuid}
+            ,#{userid}
+            ,#{functionid}
+            , '1'
+            ,#{addTime}
+            ,#{operator}
+            );
+    </insert>
+</mapper>

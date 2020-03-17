@@ -1,0 +1,8 @@
+# 论文相关路径配置信息
+thesis:
+  # 原始文件保存路径
+  thesispath: G:\\
+  # 查重报告路径
+  reportpath: G:\\
+  # 语法检测路径
+  grammarlypath: G:\\

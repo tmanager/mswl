@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.article.ArticleRepository">
+
+    <!--
+         web端推荐阅读操作Mapper.
+         @author 张孝党 2019/12/16.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/16 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getArticleList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as artid
+             ,a.title
+             ,a.cover as coverimage
+             ,a.updtime as time
+             ,b.uname as editor
+        FROM
+             g_article a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+        ORDER BY a.updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_article
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+    </select>
+
+    <!-- 新增文章 -->
+    <insert id="addArticle" parameterType="Map">
+        INSERT INTO
+            g_article (
+                 id
+                ,title
+                ,cover
+                ,article
+                ,updtime
+                ,upduid
+            )
+        VALUES (
+             #{id}
+            ,#{title}
+            ,#{cover}
+            ,#{article}
+            ,#{updtime}
+            ,#{userid}
+        )
+    </insert>
+
+    <!-- 获取文章详细内容 -->
+    <select id="getArtDetail" parameterType="String" resultType="Map">
+        SELECT
+              a.title
+             ,a.updtime
+             ,b.uname
+             ,a.article
+        FROM
+             g_article a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="artid != null and artid != ''">
+            AND a.id = #{artid}
+        </if>
+    </select>
+
+    <!-- 删除文章 -->
+    <delete id="deleteArticle" parameterType="Map">
+        DELETE FROM
+            g_article
+        WHERE
+            id = #{artid}
+    </delete>
+
+    <!-- 更新文章 -->
+    <update id="updArticle" parameterType="Map">
+        UPDATE
+            g_article
+        SET
+             title = #{title}
+            ,article = #{article}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+        <if test="cover != null and cover != ''">
+            ,cover = #{cover}
+        </if>
+        WHERE
+            id = #{artid}
+    </update>
+
+    <update id="updReadCount" parameterType="Map">
+        UPDATE
+            g_article
+        SET
+            readcount = readcount + 1
+        WHERE
+            id = #{artid}
+    </update>
+
+</mapper>

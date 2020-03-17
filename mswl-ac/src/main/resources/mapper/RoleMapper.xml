@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.role.RoleRepository">
+
+    <!--
+        Copyright(C) ShanDongYinFang 2019.
+        <p>
+         web端角色信息操作Mapper.
+         @author 张明亮 2019/06/21.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/08/10 张明亮 创建.
+        -->
+
+    <!-- 查询角色信息列表. -->
+    <select id="roleQueryList" resultType="java.util.HashMap" parameterType="Map">
+        SELECT
+            id AS roleid
+            ,uname AS rolename
+            ,description AS remark
+            ,ifnull( updateTime, '' ) AS operatetime
+            ,operator AS operator
+            ,CODE AS rolecode
+        FROM
+            turnin_role
+        WHERE
+            1 =1
+        <if test="rolecode != null and rolecode != ''">
+            AND code LIKE "%"#{rolecode}"%"
+        </if>
+        <if test="rolename != null and rolename != ''">
+            AND uname LIKE "%"#{rolename}"%"
+        </if>
+        ORDER BY addTime ASC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询角色信息数量. -->
+    <select id="number" resultType="int" parameterType="Map">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_role
+        where
+         1 =1
+        <if test="rolecode != null and rolecode != ''">
+            AND code LIKE "%"#{rolecode}"%"
+        </if>
+        <if test="rolename != null and rolename != ''">
+            AND uname LIKE "%"#{rolename}"%"
+        </if>
+    </select>
+
+    <!-- 添加角色信息. -->
+    <insert id="roleAdd" parameterType="Map">
+        INSERT INTO
+            turnin_role (
+            id
+            , code
+            , uname
+            , description
+            , addTime
+            , operator
+             )
+		VALUES
+		    (
+		    #{uuid}
+		    , #{rolecode}
+		    ,#{rolename}
+		    ,#{remark}
+		    ,#{addTime}
+		    ,#{operator}
+		    );
+    </insert>
+
+    <!-- 添加角色信息 验证code唯一性. -->
+    <select id="roleOnly" resultType="int" parameterType="String">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_role
+        WHERE
+            CODE = #{rolecode};
+    </select>
+
+    <!-- 修改角色信息. -->
+    <update id="roleUpdate" parameterType="Map">
+        UPDATE turnin_role SET
+            uname = #{rolename}
+            ,description=#{remark}
+            ,updateTime=#{updateTime}
+            ,operator=#{operator}
+        WHERE
+            id= #{roleid}
+            ;
+    </update>
+
+    <!-- 删除角色信息. -->
+    <delete id="roleDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_role
+        WHERE
+            id = #{roleid};
+    </delete>
+    <!--角色查询是否被使用-->
+    <select id="roleQueryById" parameterType="String" resultType="Integer">
+        SELECT
+            count(1)
+        FROM
+            turnin_user_role_relation
+        WHERE
+          role_id =#{roleid}
+    </select>
+
+</mapper>

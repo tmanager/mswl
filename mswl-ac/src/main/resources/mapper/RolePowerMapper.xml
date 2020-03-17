@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.rolepower.RolePowerRepository">
+
+    <!--
+        Copyright(C) ShanDongYinFang 2019.
+        <p>
+        web端广告信息操作Mapper.
+        @author 张明亮 2019/07/04.
+        @version V0.0.1.
+        <p>
+         更新履历： V0.0.1 2019/07/04 张明亮 创建.
+        -->
+
+    <!-- 查询角色权限信息. -->
+    <select id="rolePowerQuery" resultType="Map" parameterType="Map">
+        SELECT
+            id AS id
+            ,role_id AS roleid
+            ,power_id AS menuid
+            ,power AS power
+        FROM
+            turnin_role_power_relation
+        WHERE
+            role_id = #{roleid}
+    </select>
+
+    <!-- 查询角色权限信息.用户添加或修改角色时使用 -->
+    <select id="rolePowerQuerys" resultType="Map" parameterType="Map">
+        SELECT distinct
+            power_id AS menuid,
+            role_id AS roleid
+        FROM
+            turnin_role_power_relation
+        WHERE
+            role_id in
+        <foreach collection="rolelist" item="roleid" open="(" close=")" separator=",">
+            #{roleid}
+        </foreach>
+    </select>
+
+    <!-- 查询角色菜单功能权限信息. -->
+    <select id="rolePowerFunctionQuery" resultType="Map" parameterType="Map">
+        SELECT
+            id AS id
+            ,power_id AS menuid
+            ,role_id AS roleid
+            ,function_id AS functionid
+            ,ftion AS ftion
+        FROM
+            turnin_role_power_function_relation
+        WHERE
+            role_id = #{roleid}
+    </select>
+
+    <!-- 添加用户权限信息. -->
+    <insert id="rolePowerAdd" parameterType="Map">
+        INSERT INTO turnin_role_power_relation (
+            id
+            , role_id
+            , power_id
+            , addTime
+            , operator
+            , power
+             )
+        VALUES(
+            #{uuid}
+            ,#{roleid}
+            ,#{menuid}
+            ,#{addTime}
+            ,#{operator}
+            ,'1');
+    </insert>
+
+    <!-- 删除角色权限关联信息. -->
+    <delete id="rolePowerDelete" parameterType="String">
+        DELETE FROM
+            turnin_role_power_relation
+        WHERE
+            role_id = #{roleid}
+            ;
+    </delete>
+
+    <!-- 删除用户权限功能按钮关联信息. -->
+    <delete id="rolePowerFunctionDelete" parameterType="String">
+        DELETE FROM
+            turnin_role_power_function_relation
+        WHERE
+            role_id=#{roleid}and power_id = #{menuid}
+    </delete>
+
+    <!-- 添加用户权限功能按钮信息. -->
+    <insert id="rolefunctionAdd" parameterType="Map">
+        INSERT INTO turnin_role_power_function_relation (
+                id
+                , power_id
+                , role_id
+                , function_id
+                , ftion
+                , addTime
+                , operator
+                 )
+            VALUES(
+                #{uuid}
+                ,#{menuid}
+                ,#{roleid}
+                ,#{functionid}
+                , '1'
+                ,#{addTime}
+                ,#{operator}
+                );
+    </insert>
+
+    <!-- 查询角色权限信息.用户添加或修改角色时使用 -->
+    <select id="rolegetuser" resultType="Map" parameterType="Map">
+        SELECT
+        user_id AS userid
+        FROM
+        turnin_user_role_relation
+        WHERE
+        role_id = #{roleid}
+    </select>
+
+    <!-- 查询用户有哪几个角色 -->
+    <select id="usergetrolenum" resultType="Map" parameterType="String">
+        SELECT
+            role_id AS roleid
+        FROM
+            turnin_user_role_relation
+        WHERE
+            user_id = #{userid}
+    </select>
+
+</mapper>

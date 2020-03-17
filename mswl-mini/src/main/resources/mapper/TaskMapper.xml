@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.crontab.TaskRepository">
+
+    <!--
+         定时任务Mapper.
+         @author 张孝党 2020/01/10.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/10 张孝党 创建.
+     -->
+
+    <!-- 取得国际版最新状态为02(已上传检测中的列表) -->
+    <select id="getCheckingReports" resultType="Map">
+        SELECT
+             id
+            ,thesisid
+        FROM
+            g_order
+        WHERE
+             status = '2'
+         AND checktype = '0'
+         AND thesisid is not null
+        ORDER BY updtime
+        limit 0, 10
+    </select>
+
+    <!-- 取得UK版最新状态为02(已上传检测中的列表) -->
+    <select id="getCheckingReportsUK" resultType="Map">
+        SELECT
+             id
+            ,thesisid
+        FROM
+            g_order
+        WHERE
+             status = '2'
+         AND checktype = '1'
+         AND thesisid is not null
+        ORDER BY updtime
+        limit 0, 10
+    </select>
+
+    <!-- 取得Grammarly最新状态为02(已上传检测中的列表) -->
+    <select id="getCheckingReportsGrammarly" resultType="Map">
+        SELECT
+             id
+            ,orderid
+        FROM
+            g_order
+        WHERE
+             status = '2'
+         AND checktype = '2'
+        ORDER BY updtime
+        limit 0, 10
+    </select>
+
+    <!-- 更新订单状态 -->
+    <update id="updOrderStatusById" parameterType="Map">
+        UPDATE
+             g_order
+        <trim prefix="set" suffixOverrides=",">
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="comment != null and comment != ''">comment = #{comment},</if>
+            <if test="htmlreporturl != null and htmlreporturl != ''">htmlreporturl = #{htmlreporturl},</if>
+            <if test="pdfreporturl != null and pdfreporturl != ''">pdfreporturl = #{pdfreporturl},</if>
+            <if test="repetrate != null and repetrate != ''">repetrate = #{repetrate},</if>
+        </trim>
+        WHERE
+            id = #{id}
+    </update>
+
+    <select id="getFailureOrderList" resultType="Map">
+        SELECT
+             a.orderid
+            ,b.ext
+            ,b.originalurl
+        FROM
+            g_order_failure a
+        LEFT JOIN
+            g_order b
+         ON b.orderid = a.orderid
+        ORDER BY a.updtime
+        LIMIT 0, 10
+    </select>
+
+    <delete id="delFailureOrder" parameterType="Map">
+        DELETE FROM
+            g_order_failure
+        WHERE
+            orderid = #{orderid}
+    </delete>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.jyls.JylsRepository">
+
+    <!--
+         web端交易流水查询Mapper.
+         @author 张孝党 2020/01/22.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/22 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getDataList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id
+             ,b.pure_phone_number as phonenumber
+             ,a.tradeno
+             ,a.timeend
+             ,a.transactionid
+             ,c.bankname
+             ,a.totalfee/100 as totalfee
+        FROM
+            g_jy_ls a
+        LEFT JOIN
+            g_wx_user b
+         ON b.openid = a.openid
+        LEFT JOIN
+            g_wx_bank c
+         ON c.banktype = a.banktype
+        WHERE
+             1 = 1
+        <if test="tradeno != null and tradeno != ''">
+         AND a.tradeno = #{tradeno}
+        </if>
+        <if test="phone != null and phone != ''">
+         AND b.pure_phone_number = #{phone}
+        </if>
+        <if test="startdate != null and startdate != ''">
+         AND a.timeend &gt;= #{startdate}
+        </if>
+        <if test="enddate != null and enddate != ''">
+            AND a.timeend &lt;= #{enddate}
+        </if>
+        ORDER BY a.timeend DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize}
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getDataCnt" parameterType="Map" resultType="int">
+        SELECT
+            COUNT(*) as cnt
+        FROM
+            g_jy_ls a
+        LEFT JOIN
+            g_wx_user b
+         ON b.openid = a.openid
+        LEFT JOIN
+            g_wx_bank c
+         ON c.banktype = a.banktype
+        WHERE
+            1 = 1
+        <if test="tradeno != null and tradeno != ''">
+            AND a.tradeno = #{tradeno}
+        </if>
+        <if test="phone != null and phone != ''">
+            AND b.pure_phone_number = #{phone}
+        </if>
+        <if test="startdate != null and startdate != ''">
+            AND a.timeend &gt;= #{startdate}
+        </if>
+        <if test="enddate != null and enddate != ''">
+            AND a.timeend &lt;= #{enddate}
+        </if>
+    </select>
+
+</mapper>

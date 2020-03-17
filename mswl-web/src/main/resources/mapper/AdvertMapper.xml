@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.advert.AdvertRepository">
+
+    <!--
+         web端推轮播广告Mapper.
+         @author 张孝党 2019/12/21.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/21 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getAdvertList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as adid
+             ,a.title
+             ,a.adimage
+             ,a.adtype
+             ,a.sort
+             ,a.updtime as time
+             ,b.uname as editor
+             ,a.innerurl
+        FROM
+             g_advert a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+        ORDER BY a.sort
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_advert
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+    </select>
+
+    <!-- 新增文章 -->
+    <insert id="addAdvert" parameterType="Map">
+        INSERT INTO
+            g_advert (
+                 id
+                ,title
+                ,adimage
+                ,adtype
+                ,article
+                ,sort
+                ,updtime
+                ,upduid
+                ,innerurl
+            )
+        VALUES (
+             #{id}
+            ,#{title}
+            ,#{adimage}
+            ,#{adtype}
+            ,#{article}
+            ,#{sort}
+            ,#{updtime}
+            ,#{upduid}
+            ,#{innerurl}
+        )
+    </insert>
+
+    <!-- 删除文章 -->
+    <delete id="deleteAdvert" parameterType="Map">
+        DELETE FROM
+            g_advert
+        WHERE
+            id = #{id}
+    </delete>
+
+    <!-- 更新文章 -->
+    <update id="updAdvert" parameterType="Map">
+        UPDATE
+            g_advert
+        SET
+             title = #{title}
+            ,article = #{article}
+            ,adtype = #{adtype}
+            ,sort = #{sort}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+            ,innerurl = #{innerurl}
+        <if test="adimage != null and adimage != ''">
+            ,adimage = #{adimage}
+        </if>
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 获取文章详细内容 -->
+    <select id="getAdvertDetail" parameterType="Map" resultType="Map">
+        SELECT
+             a.title
+            ,a.updtime
+            ,b.uname
+            ,a.adimage
+            ,a.adtype
+            ,a.article
+            ,a.sort
+            ,a.innerurl
+        FROM
+            g_advert a
+        LEFT JOIN
+            turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+        1 = 1
+        <if test="id != null and id != ''">
+            AND a.id = #{id}
+        </if>
+    </select>
+</mapper>

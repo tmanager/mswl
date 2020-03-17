@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.feature.FeatureRepository">
+
+    <!--
+         web特色服务Mapper.
+         @author 张孝党 2019/12/23.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/23 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getServiceList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as servid
+             ,a.servname
+             ,a.servimage
+             ,a.servtype
+             ,a.sort
+             ,a.updtime as time
+             ,b.uname as editor
+             ,a.servlink
+        FROM
+             g_feature a
+        LEFT JOIN
+             turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+            1 = 1
+        <if test="servname != null and servname != ''">
+            AND servname LIKE "%"#{servname}"%"
+        </if>
+        ORDER BY a.sort
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_feature
+        WHERE
+            1 = 1
+        <if test="title != null and title != ''">
+            AND title LIKE "%"#{title}"%"
+        </if>
+    </select>
+
+    <!-- 新增特色服务 -->
+    <insert id="addFeature" parameterType="Map">
+        INSERT INTO
+            g_feature (
+                 id
+                ,servname
+                ,servimage
+                ,servtype
+                ,article
+                ,sort
+                ,updtime
+                ,upduid
+                ,servlink
+            )
+        VALUES (
+             #{id}
+            ,#{servname}
+            ,#{servimage}
+            ,#{servtype}
+            ,#{article}
+            ,#{sort}
+            ,#{updtime}
+            ,#{upduid}
+            ,#{servlink}
+        )
+    </insert>
+
+    <!-- 删除文章 -->
+    <delete id="deleteFeature" parameterType="Map">
+        DELETE FROM
+            g_feature
+        WHERE
+            id = #{id}
+    </delete>
+
+    <!-- 更新特色服务 -->
+    <update id="updFeature" parameterType="Map">
+        UPDATE
+        g_feature
+        SET
+             servname = #{servname}
+            ,article = #{article}
+            ,servtype = #{servtype}
+            ,sort = #{sort}
+            ,updtime = #{updtime}
+            ,upduid = #{upduid}
+            ,servlink = #{servlink}
+        <if test="servimage != null and servimage != ''">
+            ,servimage = #{servimage}
+        </if>
+        WHERE
+            id = #{id}
+    </update>
+
+    <!-- 获取特色服务详细内容 -->
+    <select id="getFeatureDetail" parameterType="Map" resultType="Map">
+        SELECT
+             a.servname
+            ,a.updtime
+            ,b.uname
+            ,a.servimage
+            ,a.servtype
+            ,a.article
+            ,a.sort
+            ,a.servlink
+        FROM
+            g_feature a
+        LEFT JOIN
+            turnin_user b
+          ON a.upduid = b.uid
+        WHERE
+        1 = 1
+        <if test="id != null and id != ''">
+            AND a.id = #{id}
+        </if>
+    </select>
+</mapper>

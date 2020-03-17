@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.portal.PortalRepository">
+
+    <!--
+         web首页数据查询Mapper.
+         @author 张孝党 2020/01/18.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/18 张孝党 创建.
+     -->
+
+    <select id="getTodayUserCnt" parameterType="Map" resultType="int">
+        SELECT
+            COUNT(*) AS cnt
+        FROM
+            g_wx_user
+        WHERE
+            updtime LIKE CONCAT(#{updtime},'%')
+    </select>
+
+    <select id="getTotalUserCnt" resultType="int">
+        SELECT
+            COUNT(*) AS cnt
+        FROM
+            g_wx_user
+    </select>
+
+    <select id="getPerUserCnt" resultType="int">
+        SELECT
+            COUNT(*) AS cnt
+        FROM
+            g_wx_user
+        WHERE
+            perflag = '1'
+    </select>
+
+    <select id="getTotalOrderCnt" parameterType="Map" resultType="int">
+        SELECT
+            COUNT(*) AS cnt
+        FROM
+            g_order
+        WHERE
+            status in ('2', '3', '4')
+        <if test="checktype != null and checktype != ''">
+            AND checktype = #{checktype}
+        </if>
+    </select>
+
+    <select id="getTotalOrderAmount" parameterType="Map" resultType="int">
+        SELECT
+            IFNULL(SUM(b.totalfee), '0') AS amt
+        FROM
+            g_order a
+        LEFT JOIN
+            g_jy_ls b
+         ON b.tradeno = a.tradeno
+        WHERE
+            a.status in ('2', '3', '4')
+        <if test="checktype != null and checktype != ''">
+            AND a.checktype = #{checktype}
+        </if>
+    </select>
+
+    <select id="getTodayOrderCnt" parameterType="Map" resultType="int">
+        SELECT
+            COUNT(*) AS cnt
+        FROM
+            g_order
+        WHERE
+            status in ('2', '3', '4')
+        <if test="checktype != null and checktype != ''">
+            AND checktype = #{checktype}
+        </if>
+        <if test="updtime != null and updtime != ''">
+            AND updtime LIKE CONCAT(#{updtime},'%')
+        </if>
+    </select>
+
+    <select id="getTodayOrderAmount" parameterType="Map" resultType="int">
+        SELECT
+            IFNULL(SUM(b.totalfee), '0') AS amt
+        FROM
+            g_order a
+        LEFT JOIN
+            g_jy_ls b
+         ON b.tradeno = a.tradeno
+        WHERE
+            a.status in ('2', '3', '4')
+        <if test="checktype != null and checktype != ''">
+            AND a.checktype = #{checktype}
+        </if>
+        <if test="updtime != null and updtime != ''">
+            AND a.updtime LIKE CONCAT(#{updtime},'%')
+        </if>
+    </select>
+
+    <select id="getLineData" parameterType="Map" resultType="Map">
+        SELECT
+             c.updtime as date
+            ,FORMAT(COUNT(CASE WHEN checktype = '0' THEN totalfee END), 0) AS turnincount
+            ,FORMAT(IFNULL(SUM(CASE WHEN checktype = '0' THEN totalfee END), 0)/100, 2) AS turninamount
+            ,FORMAT(COUNT(CASE WHEN checktype = '1' THEN totalfee END), 0) AS turninukcount
+            ,FORMAT(IFNULL(SUM(CASE WHEN checktype = '1' THEN totalfee END), 0)/100, 2) AS turninukamount
+            ,FORMAT(COUNT(CASE WHEN checktype = '2' THEN totalfee END), 0) AS gramcount
+            ,FORMAT(IFNULL(SUM(CASE WHEN checktype = '2' THEN totalfee END), 0)/100, 2) AS gramamount
+        FROM (
+            SELECT
+                 LEFT(a.updtime, 8) AS updtime
+                ,a.checktype
+                ,IFNULL(b.totalfee, '0') AS totalfee
+            FROM
+                g_order a
+            LEFT JOIN
+                g_jy_ls b
+             ON b.tradeno = a.tradeno
+            WHERE
+                 a.status in ('2', '3', '4')
+             AND updtime &gt;= ${startdate}
+             AND updtime &lt;= ${enddate}
+            ORDER BY
+                a.updtime
+        ) c
+        GROUP BY
+            c.updtime
+        ORDER BY
+            c.updtime
+    </select>
+    
+    <select id="getStatusData" resultType="Map">
+        SELECT
+            CASE
+                WHEN status = '2' THEN '检测中'
+                WHEN status = '3' THEN '报告下载中'
+                WHEN status = '4' THEN '检测完成'
+            END AS status
+           ,COUNT(*) AS value
+        FROM
+            g_order
+        WHERE
+            status in ('2', '3', '4')
+        GROUP BY
+            status
+    </select>
+
+    <select id="getCheckTypeData" resultType="Map">
+        SELECT
+            CASE
+                WHEN checktype = '0' THEN 'Turnitin国际'
+                WHEN checktype = '1' THEN 'TurnitinUK'
+                WHEN checktype = '2' THEN 'Grammarly'
+            END AS checktype
+           ,COUNT(*) AS value
+        FROM
+            g_order
+        WHERE
+            status in ('2', '3', '4')
+        GROUP BY
+            checktype
+    </select>
+</mapper>

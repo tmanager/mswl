@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.login.LoginRepository">
+
+    <!--
+         Copyright(C) ShanDongYinFang 2019.
+         <p>
+         web端广告信息操作Mapper.
+         @author 张明亮 2019/08/12.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/08/12 张明亮 创建.
+        -->
+
+    <!-- 获取用户信息. -->
+    <select id="getUserInfo" parameterType="String" resultType="Map">
+        SELECT
+            id
+            ,login_name
+            ,passwd
+            ,uname
+        FROM
+            turnin_user
+        WHERE
+        <if test="loginName  != null and loginName  != ''">
+            login_name=#{loginName}
+        </if>
+    </select>
+    <!-- 用户登录验证. -->
+    <select id="validateLogon" parameterType="Map" resultType="Map">
+         SELECT
+            u.id,
+            u.uid AS uid,
+            u.portrait AS image,
+            u.uname AS username,
+            o.organ_id AS organid,
+            (SELECT uname FROM turnin_organ yo WHERE yo.id=o.organ_id) AS organname
+        FROM
+            turnin_user u
+            LEFT JOIN turnin_user_organ_relation o ON u.id = o.user_id
+        WHERE
+            u.uid = #{userid}
+
+            AND u.passwd =#{passwd}
+    </select>
+</mapper>

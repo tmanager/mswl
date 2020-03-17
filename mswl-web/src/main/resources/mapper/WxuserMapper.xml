@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.wxuser.WxuserRepository">
+
+    <!--
+         微信用户管理Mapper.
+         @author 张孝党 2020/01/21.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/01/21 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getWxuserList" parameterType="Map" resultType="Map">
+        SELECT
+              IFNULL(a.nick_name, ' ') as nickname
+             ,IFNULL(a.avatarurl, ' ') as avatarurl
+             ,IFNULL(a.phonenumber, ' ') as phonenumber
+             ,IFNULL(e.mark, '0') as mark
+             ,IFNULL(a.learn_country, ' ') as learncountry
+             ,IFNULL(a.major, ' ') as major
+             ,IFNULL(a.email, ' ') as email
+             ,IFNULL(b.ordernum, 0) as ordernum
+             ,IFNULL(c.orderamount, 0) as orderamount
+        FROM
+            g_wx_user a
+        LEFT JOIN
+            (SELECT
+               openid,count(openid) as ordernum
+            FROM
+                g_order
+            WHERE
+                status in ('2', '3', '4')
+            GROUP BY openid) b
+        on a.openid = b.openid
+        LEFT JOIN (
+                SELECT
+                     openid
+                    ,sum(totalfee)/100 as orderamount
+                FROM
+                    g_jy_ls
+                GROUP BY openid
+        ) c
+        on a.openid = c.openid
+        LEFT JOIN (
+            SELECT
+                 d.openid
+                ,SUM(mark) as mark
+            FROM (
+                SELECT
+                     openid
+                    ,CASE
+                        WHEN entry = '0' THEN CAST(mark AS SIGNED)
+                        WHEN entry = '1' THEN CAST(mark AS SIGNED) * -1
+                        WHEN entry = '2' THEN CAST(mark AS SIGNED) * -1
+                        ELSE CAST(mark AS SIGNED)
+                    END AS mark
+                FROM
+                    g_mark_his
+            ) d
+            GROUP BY d.openid
+        ) e
+        ON e.openid = a.openid
+        WHERE
+            1 = 1
+        <if test="nickname != null and nickname != ''">
+            AND nick_name LIKE "%"#{nickname}"%"
+        </if>
+        <if test="phonenumber != null and phonenumber != ''">
+            AND phonenumber = #{phonenumber}
+        </if>
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_wx_user
+        WHERE
+            1 = 1
+        <if test="nickname != null and nickname != ''">
+            AND nick_name LIKE "%"#{nickname}"%"
+        </if>
+        <if test="phonenumber != null and phonenumber != ''">
+            AND phonenumber = #{phonenumber}
+        </if>
+    </select>
+
+</mapper>

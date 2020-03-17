@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.organ.OrganRepository">
+
+    <!--
+         Copyright(C) ShanDongYinFang 2019.
+         <p>
+         web端机构信息操作Mapper.
+         @author 张明亮 2019/06/22.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/06/22 张明亮 创建.
+       -->
+
+    <resultMap type="com.frank.mswl.ac.organ.OrganResponse$OrganTree" id="OrganTree">
+        <id column="organid" property="organid"/>
+        <collection property="organlist" select="getSonOrgan" column="organid"></collection>
+    </resultMap>
+    <!-- 查询主机构信息列表. -->
+    <select id="organQueryList" resultMap="OrganTree" parameterType="Map">
+        SELECT
+        o.id AS organid
+        ,o.uname AS organname
+        ,o.sort AS sort
+        ,o.leader AS leader
+        ,o.phone AS phone
+        ,o.address AS address
+        ,o.description AS remark
+        ,o.code AS organcode
+        ,r.id AS areaid
+        ,r.uname AS areaidname
+        FROM
+        turnin_organ o
+        LEFT JOIN
+        turnin_region r ON o.region_id = r.id
+        WHERE
+        1 = 1
+        AND o.parent_id = ''
+        <if test="organcode != null and organcode != ''">
+            AND o.code LIKE "%"#{organcode}"%"
+        </if>
+        <if test="organname != null and organname != ''">
+            AND o.uname LIKE "%"#{organname}"%"
+        </if>
+        ORDER BY o.sort ASC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询子机构信息列表. -->
+    <select id="getSonOrgan" resultType="com.frank.mswl.ac.organ.OrganResponse$OrganTree">
+         SELECT
+            m.id AS organid
+            ,m.uname AS organname
+            ,m.sort AS sort
+            ,m.leader AS leader
+            ,m.phone AS phone
+            ,m.address AS address
+            ,m.description AS remark
+            ,m.code AS organcode
+            ,r.id AS areaid
+            ,r.uname AS areaname
+        FROM
+            turnin_organ m
+            LEFT JOIN turnin_organ ram ON m.parent_id = ram.id
+            LEFT JOIN turnin_region r ON m.region_id = r.id
+        WHERE
+            m.parent_id = #{organid}
+     </select>
+
+    <!-- 查询主机构信息列表.递归 -->
+    <select id="organQueryLists" resultType="Map" parameterType="Map">
+        SELECT
+        o.id AS organid
+        ,o.uname AS organname
+        ,o.sort AS sort
+        ,o.leader AS leader
+        ,o.phone AS phone
+        ,o.address AS address
+        ,o.description AS remark
+        ,o.code AS organcode
+        ,o.parent_id AS fjdid
+        FROM
+        turnin_organ o
+        WHERE
+        1 = 1
+        <if test="organcode != null and organcode != ''">
+            AND o.code LIKE "%"#{organcode}"%"
+        </if>
+        <if test="organname != null and organname != ''">
+            AND o.uname LIKE "%"#{organname}"%"
+        </if>
+        ORDER BY o.sort ASC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex},#{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询机构信息数量. -->
+    <select id="number" resultType="int">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_organ
+    </select>
+
+    <!-- 查询机构下是否存在子机构，事项，岗位，用户 -->
+    <select id="sonOrgan" resultType="int">
+        SELECT
+            SUM( num ) AS sum
+        FROM
+            (
+            ( SELECT count( 1 ) AS num FROM turnin_organ WHERE parent_id = #{parentorganid} ) UNION
+            ( SELECT count( 1 ) AS num FROM turnin_user_organ_relation WHERE organ_id = #{parentorganid} )
+            ) AS temp
+    </select>
+
+    <!-- 添加机构信息. -->
+    <insert id="organAdd" parameterType="Map">
+        INSERT INTO
+            turnin_organ (
+            id
+            ,code
+            ,sort
+            ,type
+            ,uname
+            ,description
+            ,parent_id
+            ,addTime
+            ,operator
+            ,leader
+            ,address
+            ,phone
+            ,region_id
+            )
+		VALUES
+		    ( #{uuid}
+		    , #{organcode}
+		    ,#{sort}
+		    ,#{type}
+		    ,#{organname}
+		    ,#{remark}
+		    ,#{parentorganid}
+		    ,#{addTime}
+		    ,#{operator}
+		    ,#{leader}
+		    ,#{address}
+		    ,#{phone}
+		    ,#{areaid}
+		    );
+    </insert>
+
+    <!-- 修改机构信息. -->
+    <update id="organUpdate" parameterType="Map">
+        UPDATE turnin_organ SET
+            uname=#{organname}
+            ,sort = #{sort}
+            ,leader=#{leader}
+            ,phone=#{phone}
+            ,address=#{address}
+            ,description=#{remark}
+            ,parent_id=#{parentorganid}
+            ,updateTime=#{updateTime}
+            ,region_id=#{areaid}
+        WHERE id= #{organid};
+    </update>
+
+    <!-- 删除机构信息. -->
+    <delete id="organDelete" parameterType="String">
+        DELETE
+        FROM
+            turnin_organ
+        WHERE
+            id = #{organid};
+    </delete>
+    <!-- 查询机构名唯一 -->
+    <select id="organOnly" resultType="int" parameterType="Map">
+        SELECT
+            count( 1 )
+        FROM
+            turnin_organ
+        WHERE
+            uname = #{organname}
+        <if test="type==1">
+          AND parent_id=''
+        </if>
+        <if test="type==2">
+          AND parent_id=#{parentorganid}
+        </if>
+    </select>
+    <!-- 查询机构名称根据id -->
+    <select id="organNameById" resultType="String" parameterType="String">
+        SELECT
+            uname AS organname
+        FROM
+            turnin_organ
+        WHERE
+            id = #{organid}
+    </select>
+</mapper>

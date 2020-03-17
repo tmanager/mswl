@@ -1,0 +1,41 @@
+server:
+  port: 8001
+  servlet:
+    context-path: /mswl/ac
+spring:
+  application:
+    name: mswl-ac
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/gramtu?allowMultiQueries=true&characterEncoding=utf8&useSSL=false&useAffectedRows=true&serverTimezone=UTC
+    username: root
+    password: 123456a?
+#  redis:
+#   host: 47.111.173.188
+#   port: 6379
+#   # 连接超时时间（毫秒）
+#   timeout: 10000
+#   # 最大空闲数
+#   lettuce:
+#     pool:
+#       #  连接池最大连接数（使用负值表示没有限制） 默认 8
+#       max-active: 200
+#       # 连接池中的最大空闲连接 默认 8
+#       max-idle: 10
+#       # 连接池最大阻塞等待时间,单位毫秒（使用负值表示没有限制） 默认 -1
+#       max-wait: 1000
+#       # 连接池中的最小空闲连接 默认 0
+#       min-idle: 0
+#     shutdown-timeout: 20000
+# rabbitmq:
+#   host: 47.111.173.188
+#   port: 5672
+#   username: yfdev
+#   password: yfdev
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    call-setters-on-nulls: true
+logging:
+  file:
+    name: /home/mswl/logs/mswl-ac.log

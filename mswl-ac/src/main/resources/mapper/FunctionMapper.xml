@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.ac.function.FunctionRepository">
+
+    <!--
+         Copyright(C) ShanDongYinFang 2019.
+         <p>
+         web端功能信息操作Mapper.
+         @author 张明亮 2019/06/25.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/06/25 张明亮 创建.
+        -->
+
+    <!-- 查询功能信息列表. -->
+    <select id="functionQuery" resultType="java.util.HashMap" parameterType="Map">
+        SELECT
+            id AS functionid
+            ,uname AS functionname
+            ,CODE AS functioncode
+            ,ifnull(description, "" ) AS remark
+        FROM
+            turnin_function_button
+        WHERE
+            menu_id = #{menuid};
+        <if test="functioncode!=null and functioncode!=''">
+            AND code LIKE CONCAT('%',#{functioncode},'%')
+        </if>
+    </select>
+
+    <!-- 添加功能信息. -->
+    <insert id="functionAdd" parameterType="Map">
+        INSERT INTO turnin_function_button (
+            id
+            ,menu_id
+            ,code
+            ,uname
+            ,description
+            ,addTime
+            ,operator
+             )
+        VALUES
+            ( #{uuid}
+            ,#{menuid}
+            ,#{functioncode}
+            ,#{functionname}
+            ,#{remark}
+            ,#{addTime}
+            ,#{operator}
+            );
+    </insert>
+
+    <!-- 修改功能信息. -->
+    <update id="functionUpdate" parameterType="Map">
+        UPDATE turnin_function_button SET
+            code=#{functioncode}
+            ,uname = #{functionname}
+            ,description=#{remark}
+            ,updateTime=#{updateTime}
+        WHERE
+            id= #{functionid}
+            ;
+    </update>
+
+    <!-- 删除菜单信息. -->
+    <delete id="functionDelete" parameterType="String">
+       DELETE
+        FROM
+            turnin_function_button
+        WHERE
+            id = #{functionid};
+    </delete>
+
+    <!-- 查询功能权限信息.用户添加或修改角色时使用 -->
+    <select id="menuFunctionQuery" resultType="java.util.HashMap" parameterType="String">
+        SELECT
+            function_id as functionid
+        FROM
+            turnin_role_power_function_relation
+        WHERE power_id=#{menuid} and role_id=#{roleid}
+    </select>
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.mini.index.IndexRepository">
+
+    <!--
+         小程序首页Mapper.
+         @author 张孝党 2019/12/25.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2019/12/25 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getAdvertList" resultType="Map">
+        SELECT
+              id as adid
+             ,title
+             ,adimage
+             ,adtype
+             ,sort
+             ,innerurl
+        FROM
+             g_advert
+        ORDER BY sort
+    </select>
+
+    <!-- 特色服务数据 -->
+    <select id="getServiceList" resultType="Map">
+        SELECT
+              id as servid
+             ,servname
+             ,servimage
+             ,servlink
+             ,servtype
+             ,sort
+        FROM
+             g_feature
+        ORDER BY sort
+    </select>
+
+    <!-- 新人专区数据 -->
+    <select id="getNewbornList" resultType="Map">
+        SELECT
+              id as newbornid
+             ,title
+        FROM
+             g_newborn
+        ORDER BY updtime DESC
+        LIMIT 0, 2
+    </select>
+
+    <!-- 海外招募 -->
+    <select id="getAbroadList" resultType="Map">
+        SELECT
+              id as abroadid
+             ,title
+        FROM
+             g_abroad
+        ORDER BY updtime DESC
+        LIMIT 0, 2
+    </select>
+
+    <!-- 推荐阅读列表 -->
+    <select id="getArticleList" resultType="Map">
+        SELECT
+             id as artid
+            ,title
+            ,cover as coverimage
+            ,readcount
+        FROM
+            g_article
+        ORDER BY updtime DESC
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询推荐阅读条数 -->
+    <select id="getArticlCnt" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            g_article
+    </select>
+
+</mapper>
