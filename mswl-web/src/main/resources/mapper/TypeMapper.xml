@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.frank.mswl.web.type.TypeRepository">
+
+    <!--
+         web分类信息管理Mapper.
+         @author 张孝党 2020/03/19.
+         @version V0.0.1.
+         <p>
+         更新履历： V0.0.1 2020/03/19 张孝党 创建.
+     -->
+
+    <!-- 查询列表 -->
+    <select id="getTypeList" parameterType="Map" resultType="Map">
+        SELECT
+              a.id as typeid
+             ,a.typename as typename
+             ,a.updateTime as time
+        FROM
+            ms_used_goods a
+        WHERE
+            1 = 1
+        AND busitype = #{busitype}
+        <if test="typename != null and typename != ''">
+            AND typename LIKE "%"#{typename}"%"
+        </if>
+        ORDER BY a.updateTime desc
+        <if test="pagingOrNot != null and pagingOrNot != ''">
+            LIMIT #{startindex}, #{pagesize};
+        </if>
+    </select>
+
+    <!-- 查询数据条数 -->
+    <select id="getCnt" parameterType="Map" resultType="int">
+        SELECT
+            count(*) as cnt
+        FROM
+            ms_used_goods
+        WHERE
+            1 = 1
+        AND busitype = #{busitype}
+        <if test="typename != null and typename != ''">
+            AND typename LIKE "%"#{typename}"%"
+        </if>
+    </select>
+
+    <!-- 新增二手商品交易信息 -->
+    <insert id="addType" parameterType="Map">
+        INSERT INTO
+            ms_used_goods (
+                 id
+                ,busitype
+                ,typename
+                ,sort
+                ,addTime
+                ,updateTime
+                ,operator
+            )
+        VALUES (
+             #{id}
+            ,#{busitype}
+            ,#{typename}
+            ,#{sort}
+            ,#{addTime}
+            ,#{updateTime}
+            ,#{operator}
+        )
+    </insert>
+
+    <!-- 删除二手商品交易信息 -->
+    <delete id="deleteType" parameterType="Map">
+        DELETE FROM
+            ms_used_goods
+        WHERE
+            id = #{id}
+    </delete>
+
+    <!-- 更新二手商品交易信息 -->
+    <update id="updType" parameterType="Map">
+        UPDATE
+            ms_used_goods
+        SET
+             typename = #{typename}
+            ,sort = #{sort}
+            ,updateTime = #{updateTime}
+            ,operator = #{operator}
+        WHERE
+            id = #{id}
+    </update>
+</mapper>
