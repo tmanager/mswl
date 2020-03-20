@@ -16,16 +16,17 @@
         SELECT
               a.id as typeid
              ,a.typename as typename
+             ,a.sort as sort
              ,a.updateTime as time
         FROM
-            ms_used_goods a
+            ms_type a
         WHERE
             1 = 1
         AND busitype = #{busitype}
         <if test="typename != null and typename != ''">
             AND typename LIKE "%"#{typename}"%"
         </if>
-        ORDER BY a.updateTime desc
+        ORDER BY CAST(a.sort AS DECIMAL(10))
         <if test="pagingOrNot != null and pagingOrNot != ''">
             LIMIT #{startindex}, #{pagesize};
         </if>
@@ -36,7 +37,7 @@
         SELECT
             count(*) as cnt
         FROM
-            ms_used_goods
+            ms_type
         WHERE
             1 = 1
         AND busitype = #{busitype}
@@ -48,7 +49,7 @@
     <!-- 新增二手商品交易信息 -->
     <insert id="addType" parameterType="Map">
         INSERT INTO
-            ms_used_goods (
+            ms_type (
                  id
                 ,busitype
                 ,typename
@@ -71,7 +72,7 @@
     <!-- 删除二手商品交易信息 -->
     <delete id="deleteType" parameterType="Map">
         DELETE FROM
-            ms_used_goods
+            ms_type
         WHERE
             id = #{id}
     </delete>
@@ -79,7 +80,7 @@
     <!-- 更新二手商品交易信息 -->
     <update id="updType" parameterType="Map">
         UPDATE
-            ms_used_goods
+            ms_type
         SET
              typename = #{typename}
             ,sort = #{sort}

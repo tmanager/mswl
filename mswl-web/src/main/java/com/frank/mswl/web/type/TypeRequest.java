@@ -21,6 +21,6 @@ public class TypeRequest extends BaseRequest {
     private String sort = "";
 
     // 删除的列表
-    private String[] typelist;
+    private String[] typeidlist;
 
 }

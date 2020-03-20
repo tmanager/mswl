@@ -96,9 +96,9 @@ public class TypeService {
      * 删除文章.
      */
     @Transactional(rollbackFor = Exception.class)
-    public String delTypeService(String[] secondHandList) {
+    public String delTypeService(String[] typeidlist) {
 
-        for (String id : secondHandList) {
+        for (String id : typeidlist) {
             Map<String, String> param = new HashMap<>();
             param.put("id", id);
             this.typeRepository.deleteType(param);

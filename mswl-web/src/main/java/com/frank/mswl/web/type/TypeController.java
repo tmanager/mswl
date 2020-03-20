@@ -82,7 +82,7 @@ public class TypeController {
         });
 
         // 删除
-        String responseData = this.typeService.delTypeService(requestData.getRequest().getTypelist());
+        String responseData = this.typeService.delTypeService(requestData.getRequest().getTypeidlist());
         log.info("删除分类信息结束..................");
         log.info("删除分类信息返回值为:{}", responseData);
         return responseData;
