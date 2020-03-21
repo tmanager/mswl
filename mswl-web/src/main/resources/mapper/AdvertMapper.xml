@@ -4,35 +4,29 @@
 <mapper namespace="com.frank.mswl.web.advert.AdvertRepository">
 
     <!--
-         web端推轮播广告Mapper.
-         @author 张孝党 2019/12/21.
+         web端首页广告Mapper.
+         @author 张孝党 2020/03/21.
          @version V0.0.1.
          <p>
-         更新履历： V0.0.1 2019/12/21 张孝党 创建.
+         更新履历： V0.0.1 2020/03/21 张孝党 创建.
      -->
 
     <!-- 查询列表 -->
     <select id="getAdvertList" parameterType="Map" resultType="Map">
         SELECT
               a.id as adid
-             ,a.title
+             ,a.adname
              ,a.adimage
-             ,a.adtype
              ,a.sort
-             ,a.updtime as time
-             ,b.uname as editor
-             ,a.innerurl
+             ,a.updateTime as time
         FROM
-             g_advert a
-        LEFT JOIN
-             turnin_user b
-          ON a.upduid = b.uid
+            ms_advert a
         WHERE
             1 = 1
-        <if test="title != null and title != ''">
-            AND title LIKE "%"#{title}"%"
+        <if test="adname != null and adname != ''">
+            AND adname LIKE "%"#{adname}"%"
         </if>
-        ORDER BY a.sort
+        ORDER BY CAST(a.sort AS DECIMAL(10))
         <if test="pagingOrNot != null and pagingOrNot != ''">
             LIMIT #{startindex}, #{pagesize};
         </if>
@@ -43,45 +37,41 @@
         SELECT
             count(*) as cnt
         FROM
-            g_advert
+            ms_advert
         WHERE
             1 = 1
-        <if test="title != null and title != ''">
-            AND title LIKE "%"#{title}"%"
+        <if test="adname != null and adname != ''">
+            AND adname LIKE "%"#{adname}"%"
         </if>
     </select>
 
     <!-- 新增文章 -->
     <insert id="addAdvert" parameterType="Map">
         INSERT INTO
-            g_advert (
+            ms_advert (
                  id
-                ,title
+                ,adname
                 ,adimage
-                ,adtype
-                ,article
                 ,sort
-                ,updtime
-                ,upduid
-                ,innerurl
+                ,addTime
+                ,updateTime
+                ,operator
             )
         VALUES (
              #{id}
-            ,#{title}
+            ,#{adname}
             ,#{adimage}
-            ,#{adtype}
-            ,#{article}
             ,#{sort}
-            ,#{updtime}
-            ,#{upduid}
-            ,#{innerurl}
+            ,#{addTime}
+            ,#{updateTime}
+            ,#{operator}
         )
     </insert>
 
     <!-- 删除文章 -->
     <delete id="deleteAdvert" parameterType="Map">
         DELETE FROM
-            g_advert
+            ms_advert
         WHERE
             id = #{id}
     </delete>
@@ -89,15 +79,12 @@
     <!-- 更新文章 -->
     <update id="updAdvert" parameterType="Map">
         UPDATE
-            g_advert
+            ms_advert
         SET
-             title = #{title}
-            ,article = #{article}
-            ,adtype = #{adtype}
+             adname = #{adname}
             ,sort = #{sort}
-            ,updtime = #{updtime}
-            ,upduid = #{upduid}
-            ,innerurl = #{innerurl}
+            ,updateTime = #{updateTime}
+            ,operator = #{operator}
         <if test="adimage != null and adimage != ''">
             ,adimage = #{adimage}
         </if>
@@ -105,26 +92,4 @@
             id = #{id}
     </update>
 
-    <!-- 获取文章详细内容 -->
-    <select id="getAdvertDetail" parameterType="Map" resultType="Map">
-        SELECT
-             a.title
-            ,a.updtime
-            ,b.uname
-            ,a.adimage
-            ,a.adtype
-            ,a.article
-            ,a.sort
-            ,a.innerurl
-        FROM
-            g_advert a
-        LEFT JOIN
-            turnin_user b
-          ON a.upduid = b.uid
-        WHERE
-        1 = 1
-        <if test="id != null and id != ''">
-            AND a.id = #{id}
-        </if>
-    </select>
 </mapper>

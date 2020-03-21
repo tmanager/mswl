@@ -21,16 +21,4 @@ public class TypeResponse extends BaseResponse {
 
     // 数据列表
     private List<Map<String, String>> typelist;
-
-    // 分类
-    private String typename = "";
-
-    // 操作时间
-    private String time = "";
-
-    // 操作人
-    private String operator = "";
-
-    // 排序号
-    private String sort = "";
 }

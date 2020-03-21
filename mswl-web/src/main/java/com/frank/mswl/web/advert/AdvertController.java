@@ -80,7 +80,7 @@ public class AdvertController {
     /**
      * 新增广告.
      */
-    @RequestMapping(value = "/advadd")
+    @RequestMapping(value = "/add")
     private String addAdvert(@RequestBody String requestParam) {
         log.info("广告新增开始..................");
 
@@ -92,24 +92,6 @@ public class AdvertController {
         String responseData = this.advertService.addAdvertService(requestData);
         log.info("广告新增结束..................");
         log.info("广告新增返回值为:{}", responseData);
-        return responseData;
-    }
-
-    /**
-     * 预览广告.
-     */
-    @RequestMapping(value = "/addetail")
-    private String advertDetail(@RequestBody String requestParam) {
-        log.info("预览广告开始..................");
-
-        log.info("请求参数为：{}", requestParam);
-        WebRequest<AdvertRequest> requestData = JSON.parseObject(requestParam, new TypeReference<WebRequest<AdvertRequest>>() {
-        });
-
-        // 预览
-        String responseData = this.advertService.advertDetailService(requestData.getRequest().getAdid());
-        log.info("预览广告结束..................");
-        log.info("预览广告返回值为:{}", responseData);
         return responseData;
     }
 
